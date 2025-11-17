@@ -22,12 +22,12 @@ const allowedOrigins = process.env.CLIENT_URL
 
 app.use(
   cors(
-    allowedOrigins
-      ? {
-          origin: allowedOrigins,
-          credentials: true,
-        }
-      : undefined
+    // allowedOrigins
+    //   ? {
+    //       origin: allowedOrigins,
+    //       credentials: true,
+    //     }
+    //   : undefined
   )
 );
 
