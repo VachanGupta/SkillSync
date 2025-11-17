@@ -1,26 +1,33 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import getApiBaseUrl from '../utils/getApiBaseUrl';
 
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [msg, setMsg] = useState('');
   const navigate = useNavigate();
+  const apiBaseUrl = getApiBaseUrl();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setMsg('');
     try {
-      const apiUrl = process.env.REACT_APP_API_URL;
-      const res = await axios.post(`${apiUrl}/api/auth/login`, { email, password });
+      const res = await axios.post(`${apiBaseUrl}/api/auth/login`, { email, password });
 
-      localStorage.setItem('token', res.data.token);
-
-      setMsg('Login successful! Redirecting...');
-      console.log('Your JWT Token:', res.data.token);
-
+      const token = res?.data?.token;
+      if (token) {
+        localStorage.setItem('token', token);
+        setMsg('Login successful! Redirecting...');
+        setTimeout(() => navigate('/'), 1500);
+      } else {
+        setMsg('Login failed: No token received');
+      }
     } catch (err) {
-      setMsg(err.response.data.msg || 'Login failed');
+      const responseMessage = err.response?.data?.msg;
+      const message = responseMessage || (err.request ? 'Network error: Could not connect to server. Is it running?' : 'Login failed');
+      setMsg(message);
     }
   };
 
