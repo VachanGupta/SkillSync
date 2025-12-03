@@ -5,7 +5,6 @@ const Mentor = require('../models/Mentor');
 const auth = require('../middleware/auth');
 const mongoose = require('mongoose');
 
-// Seed default mentors if collection is empty
 async function ensureDefaultMentors() {
   const count = await Mentor.countDocuments();
   if (count > 0) return;
@@ -86,27 +85,7 @@ async function ensureDefaultMentors() {
   await Mentor.insertMany(defaultMentors);
 }
 
-// Create mentor (kept for potential admin use, but not exposed in UI)
-router.post('/', auth, async (req, res) => {
-  try {
-    const { name, bio, skills, rating, experienceYears } = req.body;
-    if (!name) return res.status(400).json({ msg: 'Name is required' });
-    const mentor = new Mentor({
-      name,
-      bio,
-      skills: Array.isArray(skills) ? skills : skills ? skills.split(',').map((s) => s.trim()) : [],
-      rating,
-      experienceYears,
-    });
-    await mentor.save();
-    res.status(201).json(mentor);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Server error');
-  }
-});
 
-// Read mentors list (public)
 router.get('/', async (req, res) => {
   try {
     await ensureDefaultMentors();
@@ -118,7 +97,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Read single mentor
 router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -126,39 +104,6 @@ router.get('/:id', async (req, res) => {
     const mentor = await Mentor.findById(id);
     if (!mentor) return res.status(404).json({ msg: 'Mentor not found' });
     res.json(mentor);
-  } catch (err) {
-    console.error(err); res.status(500).send('Server error');
-  }
-});
-
-// Update mentor (protected)
-router.put('/:id', auth, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const updates = (({ name, bio, skills, rating }) => ({ name, bio, skills, rating }))(req.body);
-    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ msg: 'Invalid id' });
-    const mentor = await Mentor.findById(id);
-    if (!mentor) return res.status(404).json({ msg: 'Mentor not found' });
-    if (updates.skills && !Array.isArray(updates.skills)) {
-      updates.skills = updates.skills.split(',').map(s=>s.trim());
-    }
-    Object.assign(mentor, updates);
-    await mentor.save();
-    res.json(mentor);
-  } catch (err) {
-    console.error(err); res.status(500).send('Server error');
-  }
-});
-
-// Delete mentor (protected)
-router.delete('/:id', auth, async (req, res) => {
-  try {
-    const { id } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ msg: 'Invalid id' });
-    const mentor = await Mentor.findById(id);
-    if (!mentor) return res.status(404).json({ msg: 'Mentor not found' });
-    await mentor.deleteOne();
-    res.json({ msg: 'Mentor deleted' });
   } catch (err) {
     console.error(err); res.status(500).send('Server error');
   }

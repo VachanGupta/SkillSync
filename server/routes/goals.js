@@ -6,7 +6,6 @@ const Goal = require('../models/Goal');
 const User = require('../models/User');
 const mongoose = require('mongoose');
 
-// Create goal (protected)
 router.post('/', auth, async (req, res) => {
   try {
     const { title, description } = req.body;
@@ -19,7 +18,6 @@ router.post('/', auth, async (req, res) => {
   }
 });
 
-// Read all goals (protected, returns user's goals)
 router.get('/', auth, async (req, res) => {
   try {
     const goals = await Goal.find({ owner: req.user.id }).sort({ createdAt: -1 });
@@ -29,7 +27,6 @@ router.get('/', auth, async (req, res) => {
   }
 });
 
-// Read single goal (protected)
 router.get('/:id', auth, async (req, res) => {
   try {
     const { id } = req.params;
@@ -43,7 +40,6 @@ router.get('/:id', auth, async (req, res) => {
   }
 });
 
-// Update goal (protected)
 router.put('/:id', auth, async (req, res) => {
   try {
     const { id } = req.params;
@@ -60,7 +56,6 @@ router.put('/:id', auth, async (req, res) => {
   }
 });
 
-// Delete goal (protected)
 router.delete('/:id', auth, async (req, res) => {
   try {
     const { id } = req.params;
